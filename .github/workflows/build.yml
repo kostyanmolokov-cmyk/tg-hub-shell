@@ -1,0 +1,26 @@
+name: Build Windows exe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ["README.md"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run dist
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ github.run_number }}" dist/TG-Hub-Shell.exe \
+            --latest --title "TG Hub Shell #${{ github.run_number }}" \
+            --notes "Скачайте TG-Hub-Shell.exe и запустите, установка не нужна."

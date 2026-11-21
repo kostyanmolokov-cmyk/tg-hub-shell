@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>TG Hub Shell</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e14;--p:#121722;--p2:#1a2130;--line:#252d3f;--t:#e8ecf4;--m:#8b95aa;--a:#6d7cff;--r:#ef4444}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font:14px system-ui,Segoe UI,sans-serif;overflow:hidden}
+#rail{position:fixed;left:0;top:0;bottom:0;width:58px;background:var(--p);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0}
+.nb{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--p2);color:var(--m);font-weight:600;font-size:12px;cursor:pointer;position:relative}
+.nb:hover{color:var(--t)}.nb.on{border:2px solid var(--a);color:var(--t)}
+.bd{position:absolute;top:-5px;right:-5px;background:var(--r);color:#fff;border-radius:9px;min-width:17px;height:17px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+#tabs{position:fixed;left:58px;right:0;top:0;height:44px;background:var(--p);border-bottom:1px solid var(--line);display:flex;align-items:flex-end;gap:4px;padding:0 8px;overflow-x:auto}
+.tab{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:9px 9px 0 0;color:var(--m);cursor:pointer;white-space:nowrap;border:1px solid transparent;border-bottom:none}
+.tab.on{background:var(--bg);color:var(--t);border-color:var(--line)}
+.tab .x{opacity:.5;font-size:13px;padding:0 2px}.tab .x:hover{opacity:1;color:var(--r)}
+#bar{position:fixed;left:58px;right:0;top:44px;height:40px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 10px}
+button.ic{background:transparent;border:1px solid transparent;color:var(--m);border-radius:8px;width:30px;height:28px;cursor:pointer;font-size:15px}
+button.ic:hover{background:var(--p2);color:var(--t)}
+#nname{margin-left:8px;color:var(--m);font-size:13px}
+.compact #rail,.compact #tabs,.compact #bar{display:none}
+#mod{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center}
+#mod .box{background:var(--p);border:1px solid var(--line);border-radius:14px;padding:18px;width:360px;max-width:92vw}
+#mod h3{margin:0 0 12px;font-size:16px}#mod label{display:block;color:var(--m);font-size:12px;margin:8px 0 3px}
+#mod input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--t);border-radius:8px;padding:8px 10px;font-size:14px}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.row button{background:var(--p2);color:var(--t);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer}
+.row button.pri{background:var(--a);border-color:var(--a)}.row button.dan{color:var(--r);margin-right:auto}
+</style></head><body>
+<div id="rail"></div><div id="tabs"></div>
+<div id="bar"><button class="ic" id="back" title="Назад">←</button><button class="ic" id="fwd" title="Вперёд">→</button><button class="ic" id="reload" title="Обновить">↻</button><button class="ic" id="home" title="На главную сети">⌂</button><span id="nname"></span></div>
+<div id="mod"><div class="box" id="box"></div></div>
+<script src="ui.js"></script></body></html>

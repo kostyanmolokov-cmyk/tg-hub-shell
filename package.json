@@ -1,0 +1,29 @@
+{
+  "name": "tg-hub-shell",
+  "version": "0.1.0",
+  "description": "Оболочка с вкладками: ТГ Хаб, ВКонтакте и другие сайты в одном окне",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "local.tghub.shell",
+    "productName": "TG Hub Shell",
+    "files": [
+      "main.js",
+      "preload.js",
+      "preload-hub.js",
+      "ui.html",
+      "ui.js"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "artifactName": "TG-Hub-Shell.exe"
+  }
+}
