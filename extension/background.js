@@ -18,20 +18,34 @@ function roots(urls) {
   return [...s];
 }
 
-async function setSites(urls) {
-  const r = roots(urls);
-  await chrome.storage.local.set({ roots: r });
-  const rules = r.length ? [{
+// Правило действует только во вкладках с хабом (tabIds), только для сайтов из вашего списка и только для рамок —
+// так внутри рамки работают и переходы по ссылкам, а в обычных вкладках сайты остаются как были.
+async function rebuild() {
+  const { roots: r = [] } = await chrome.storage.local.get("roots");
+  const { hubTabs = [] } = await chrome.storage.session.get("hubTabs");
+  const rules = r.length && hubTabs.length ? [{
     id: 1, priority: 1,
-    condition: { initiatorDomains: [HUB_HOST], requestDomains: r, resourceTypes: ["sub_frame"] },
+    condition: { tabIds: hubTabs, requestDomains: r, resourceTypes: ["sub_frame"] },
     action: { type: "modifyHeaders", responseHeaders: [
       { header: "x-frame-options", operation: "remove" },
       { header: "content-security-policy", operation: "remove" },
       { header: "content-security-policy-report-only", operation: "remove" }
     ] }
   }] : [];
-  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [1], addRules: rules });
+  await chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [1], addRules: rules });
 }
+async function setSites(urls, tabId) {
+  await chrome.storage.local.set({ roots: roots(urls) });
+  const { hubTabs = [] } = await chrome.storage.session.get("hubTabs");
+  if (!hubTabs.includes(tabId)) hubTabs.push(tabId);
+  await chrome.storage.session.set({ hubTabs });
+  await rebuild();
+}
+chrome.tabs.onRemoved.addListener(async (id) => {
+  const { hubTabs = [] } = await chrome.storage.session.get("hubTabs");
+  if (hubTabs.includes(id)) { await chrome.storage.session.set({ hubTabs: hubTabs.filter((x) => x !== id) }); await rebuild(); }
+});
+chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [1] }).catch(() => {});   // правило старых версий
 
 // SameSite=None для cookie сайтов из списка (нужно, чтобы вход работал внутри рамки)
 chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
@@ -64,9 +78,21 @@ function fillFrame(login, pass, root) {
   }, 500);
 }
 
+// Назад/вперёд внутри рамки: только по истории самой рамки (Navigation API), хаб при этом не затрагивается
+function navFrame(action, root) {
+  const rootOf = (h) => { const p = h.toLowerCase().split("."); if (p.length <= 2) return h; const n = p[p.length - 1].length === 2 && ["co", "com", "org", "net", "gov", "ac"].includes(p[p.length - 2]) ? 3 : 2; return p.slice(-n).join("."); };
+  if (window.parent !== window.top || rootOf(location.hostname) !== root || !window.navigation) return;
+  if (action === "back" && navigation.canGoBack) navigation.back().finished.catch(() => {});
+  if (action === "forward" && navigation.canGoForward) navigation.forward().finished.catch(() => {});
+}
+
 chrome.runtime.onMessage.addListener((msg, sender) => {
   if (sender.id !== chrome.runtime.id || !sender.tab || !(sender.url || "").startsWith(HUB)) return;
-  if (msg.type === "sites") setSites(msg.urls);
+  if (msg.type === "sites") setSites(msg.urls, sender.tab.id);
+  if (msg.type === "nav" && (msg.action === "back" || msg.action === "forward")) {
+    let root; try { const u = new URL(msg.url); if (u.protocol !== "https:") return; root = rootOf(u.hostname); } catch (e) { return; }
+    chrome.scripting.executeScript({ target: { tabId: sender.tab.id, allFrames: true }, func: navFrame, args: [msg.action, root] }).catch(() => {});
+  }
   if (msg.type === "fill" && (msg.login || msg.pass)) {
     let root; try { const u = new URL(msg.url); if (u.protocol !== "https:") return; root = rootOf(u.hostname); } catch (e) { return; }
     chrome.scripting.executeScript({ target: { tabId: sender.tab.id, allFrames: true }, func: fillFrame, args: [msg.login, msg.pass, root] }).catch(() => {});
