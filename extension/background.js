@@ -72,3 +72,10 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     chrome.scripting.executeScript({ target: { tabId: sender.tab.id, allFrames: true }, func: fillFrame, args: [msg.login, msg.pass, root] }).catch(() => {});
   }
 });
+
+// Нажатие на значок расширения открывает ТГ Хаб (или переключает на уже открытую вкладку)
+chrome.action.onClicked.addListener(async () => {
+  const tabs = await chrome.tabs.query({ url: HUB + "*" });
+  if (tabs.length) { await chrome.tabs.update(tabs[0].id, { active: true }); await chrome.windows.update(tabs[0].windowId, { focused: true }); }
+  else chrome.tabs.create({ url: HUB });
+});

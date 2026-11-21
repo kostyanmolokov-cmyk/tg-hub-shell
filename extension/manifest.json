@@ -2,14 +2,37 @@
   "manifest_version": 3,
   "name": "ТГ Хаб: сайты внутри хаба",
   "short_name": "ТГ Хаб",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Открывает ВКонтакте и другие ваши сайты внутри ТГ Хаба и подставляет логин и пароль.",
-  "icons": { "16": "icon16.png", "48": "icon48.png", "128": "icon128.png" },
-  "permissions": ["declarativeNetRequest", "scripting", "cookies", "storage"],
-  "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "background.js" },
-  "content_scripts": [
-    { "matches": ["https://tg-hub.onrender.com/*"], "js": ["bridge.js"], "run_at": "document_start" }
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "scripting",
+    "cookies",
+    "storage"
   ],
-  "action": { "default_title": "ТГ Хаб" }
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://tg-hub.onrender.com/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_title": "Открыть ТГ Хаб"
+  }
 }
