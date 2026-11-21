@@ -21,7 +21,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          V=$(python -c "import json;print(json.load(open('extension/manifest.json',encoding='utf-8'))['version'])")
+          echo "Версия расширения: $V" > "extension/version-$V.txt"
           python -c "import shutil; shutil.make_archive('TG-Hub-Extension','zip','extension')"
           gh release create "v${{ github.run_number }}" dist/TG-Hub-Shell.exe TG-Hub-Extension.zip \
-            --latest --title "TG Hub Shell #${{ github.run_number }}" \
-            --notes "TG-Hub-Shell.exe — программа для Windows (установка не нужна). TG-Hub-Extension.zip — расширение для браузера."
+            --latest --title "Расширение $V · программа #${{ github.run_number }}" \
+            --notes "Расширение для браузера: версия $V (TG-Hub-Extension.zip). TG-Hub-Shell.exe — программа для Windows, установка не нужна."
